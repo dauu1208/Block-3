@@ -11,6 +11,34 @@ db.exec(`CREATE TABLE IF NOT EXISTS students(
   created_at TEXT DEFAULT CURRENT_TIMESTAMP,
   UNIQUE(student_code, class_name))`);
 
+// Older databases were created with `student_code TEXT UNIQUE`, which blocks the same
+// student ID across ALL classes. `CREATE TABLE IF NOT EXISTS` never changes an existing
+// table, so rebuild it once with UNIQUE(student_code, class_name) (data is kept).
+(function migrateStudentsTable() {
+  const idCodeOnly = db
+    .prepare("PRAGMA index_list(students)")
+    .all()
+    .filter((i) => i.unique)
+    .some((i) => {
+      const cols = db.prepare(`PRAGMA index_info("${i.name}")`).all();
+      return cols.length === 1 && cols[0].name === "student_code";
+    });
+  if (!idCodeOnly) return;
+  db.transaction(() => {
+    db.exec(`
+      ALTER TABLE students RENAME TO students_old;
+      CREATE TABLE students(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        full_name TEXT NOT NULL, student_code TEXT NOT NULL,
+        email TEXT NOT NULL, class_name TEXT NOT NULL,
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(student_code, class_name));
+      INSERT INTO students(id, full_name, student_code, email, class_name, created_at)
+        SELECT id, full_name, student_code, email, class_name, created_at FROM students_old;
+      DROP TABLE students_old;`);
+  })();
+})();
+
 app.set("view engine", "ejs");
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static("public"));
@@ -174,7 +202,9 @@ app.post("/register", (req, res) => {
         `INSERT INTO students(full_name,student_code,email,class_name)
       VALUES(@full_name,@student_code,@email,@class_name)`,
       ).run(v);
-    } catch {
+    } catch (e) {
+      // Only a real duplicate (same ID + same class) gets this message; show other errors as-is
+      if (!String(e.code).startsWith("SQLITE_CONSTRAINT")) throw e;
       err = `Student ID ${v.student_code} already exists in ${v.class_name}.`;
     }
   if (err) return registerView(res, err, v, 400);
