@@ -52,6 +52,18 @@ const PER_PAGE = 6;
 const tidyName = Validators.tidy;
 const nameCollator = new Intl.Collator("vi", { sensitivity: "base" });
 
+// Vietnamese name order for sorting: given name first, then middle name(s), then family name.
+// "Nguyễn Thị Thu Hà" is compared as Hà -> Thu -> Thị -> Nguyễn (last word back to first word).
+const compareNames = (a, b) => {
+  const wa = tidyName(a).split(" ").reverse();
+  const wb = tidyName(b).split(" ").reverse();
+  for (let i = 0; i < Math.min(wa.length, wb.length); i++) {
+    const r = nameCollator.compare(wa[i], wb[i]);
+    if (r) return r;
+  }
+  return wa.length - wb.length; // all shared words equal: the shorter name comes first
+};
+
 app.get("/students", (req, res) => {
   const s = (req.query.q || "").toString().trim();
   const like = `%${s}%`;
@@ -85,7 +97,7 @@ app.get("/students", (req, res) => {
     all.sort((a, b) => {
       let r = 0;
       if (sortId) r = a.student_code.localeCompare(b.student_code);
-      if (!r && sortName) r = nameCollator.compare(a.full_name, b.full_name);
+      if (!r && sortName) r = compareNames(a.full_name, b.full_name);
       return r * dir || a.id - b.id;
     });
   } else all.sort((a, b) => b.id - a.id); // default: newest first
