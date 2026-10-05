@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Twinkle Class</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Fredoka:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/style.css">
+<link rel="stylesheet" href="/css/transition.css">
+<script>
+/* Just arrived via a transition? Turn the overlay on BEFORE the first paint so there is no flash */
+try{var t=sessionStorage.getItem('vt');if(t){sessionStorage.removeItem('vt');var r=document.documentElement;r.dataset.vt=t;r.classList.add('vt-in')}}catch(e){}
+</script>
+<script src="/js/transition.js" defer></script>
+</head>
+<body>
+<%- include('transition') %>
+<nav class="nav">
+  <a href="/" class="logo">Twinkle</a>
+  <a href="/students" class="<%= page==='students'?'on':'' %>">Students</a>
+  <a href="/register" class="<%= page==='register'?'on':'' %>">Register</a>
+</nav>
+<main class="wrap">

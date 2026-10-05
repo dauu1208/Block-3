@@ -1,0 +1,26 @@
+<%- include('partials/head') %>
+<%
+  const words = r.full_name.trim().split(/\s+/);
+  const initials = (words.length > 1 ? words[0][0] + words[words.length - 1][0] : words[0].slice(0, 2)).toUpperCase();
+  const pal = [['#5aa9ff','#2a6fd6'],['#ff8fc7','#d9569a'],['#ffb454','#d9822a'],['#5be0a0','#2aa56e'],['#8d8bff','#5b58d6'],['#ff6f91','#c93a5c']][r.id % 6];
+%>
+<section class="page" style="--bg:<%= pal[0] %>;--sh:<%= pal[1] %>">
+  <span class="ghost" aria-hidden="true"><%= String(no).padStart(2, '0') %></span>
+  <article class="card profile">
+    <div class="avatar"><%= initials %></div>
+    <span class="chip"><%= r.class_name %></span>
+    <h2><%= r.full_name %></h2>
+    <ul class="info">
+      <li><b>Student ID</b><span><%= r.student_code %></span></li>
+      <li><b>Email</b><span><%= r.email %></span></li>
+      <li><b>Joined</b><span><%= r.created_at.slice(0, 10) %></span></li>
+    </ul>
+    <small class="no">Friend <%= no %> of <%= total %></small>
+  </article>
+</section>
+<div class="pager">
+  <% if (prev) { %><a class="btn mint pop" href="/students/<%= prev.id %>">← Previous</a><% } %>
+  <a class="btn sun pop" href="/students">Students</a>
+  <% if (next) { %><a class="btn pink pop" href="/students/<%= next.id %>">Next →</a><% } %>
+</div>
+<%- include('partials/foot') %>

@@ -1,0 +1,11 @@
+<%- include('partials/head') %>
+<section class="hero">
+  <p class="chip">Our little classroom</p>
+  <h1 class="bubble" data-bubble="Twinkle"></h1>
+  <p class="sub"><b><%= total %></b> <%= total === 1 ? 'friend has' : 'friends have' %> joined. Let's soar high together!</p>
+  <div class="actions">
+    <a href="/register" class="btn pink pop">Sign up now</a>
+    <a href="/students" class="btn mint pop">View the list</a>
+  </div>
+</section>
+<%- include('partials/foot') %>

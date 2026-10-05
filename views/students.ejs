@@ -1,0 +1,17 @@
+<%- include('partials/head') %>
+<h2 class="bubble s" data-bubble="Students"></h2>
+<% if (ok) { %><p class="toast">You're registered! Your name is now on the list.</p><% } %>
+<form class="search" method="get" action="/students">
+  <input name="q" value="<%= s %>" placeholder="Search by name, ID or class">
+  <button class="btn sun pop">Search</button>
+</form>
+<section class="grid">
+<% rows.forEach(r => { %>
+  <a class="card tilt student" href="/students/<%= r.id %>">
+    <h3><%= r.full_name %></h3><p><%= r.student_code %></p><span class="chip"><%= r.class_name %></span>
+    <small>View profile →</small>
+  </a>
+<% }) %>
+</section>
+<% if (!rows.length) { %><p class="empty">No students yet. <a href="/register">Be the first to register</a></p><% } %>
+<%- include('partials/foot') %>
