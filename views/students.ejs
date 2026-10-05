@@ -1,0 +1,17 @@
+<%- include('partials/head') %>
+<h2 class="bubble s" data-bubble="Danh sách"></h2>
+<% if (ok) { %><p class="toast">Đăng ký thành công! Bạn đã có tên trong danh sách.</p><% } %>
+<form class="search" method="get" action="/students">
+  <input name="q" value="<%= s %>" placeholder="Tìm theo tên, mã hoặc lớp">
+  <button class="btn sun pop">Tìm</button>
+</form>
+<section class="grid">
+<% rows.forEach(r => { %>
+  <article class="card tilt flip" tabindex="0">
+    <div class="face front"><h3><%= r.full_name %></h3><p><%= r.student_code %></p><span class="chip"><%= r.class_name %></span></div>
+    <div class="face back"><p><%= r.email %></p><p><%= r.created_at.slice(0,10) %></p></div>
+  </article>
+<% }) %>
+</section>
+<% if (!rows.length) { %><p class="empty">Chưa có bạn nào. <a href="/register">Đăng ký người đầu tiên</a></p><% } %>
+<%- include('partials/foot') %>
