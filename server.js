@@ -6,9 +6,10 @@ const db = new Database("students.db");
 
 db.exec(`CREATE TABLE IF NOT EXISTS students(
   id INTEGER PRIMARY KEY AUTOINCREMENT,
-  full_name TEXT NOT NULL, student_code TEXT UNIQUE NOT NULL,
+  full_name TEXT NOT NULL, student_code TEXT NOT NULL,
   email TEXT NOT NULL, class_name TEXT NOT NULL,
-  created_at TEXT DEFAULT CURRENT_TIMESTAMP)`);
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(student_code, class_name))`);
 
 app.set("view engine", "ejs");
 app.use(express.urlencoded({ extended: false }));
@@ -20,23 +21,29 @@ app.get("/", (req, res) => {
 });
 
 const PER_PAGE = 6;
+const tidyName = Validators.tidy;
 const nameCollator = new Intl.Collator("vi", { sensitivity: "base" });
 
 app.get("/students", (req, res) => {
   const s = (req.query.q || "").toString().trim();
   const like = `%${s}%`;
 
-  // Filter by class (only accept the known classes)
+  // Filter by class: exactly one class (only the known ones). Empty = all classes
   const cls = Validators.CLASSES.includes(req.query.class)
     ? req.query.class
     : "";
 
-  // Sort options: any of "id" / "name". If both are chosen, Student ID wins.
+  // Sort keys: "id" and/or "name". Both ticked -> Student ID first, Name breaks ties.
   const sorts = []
     .concat(req.query.sort || [])
     .filter((x) => x === "id" || x === "name");
   const sortId = sorts.includes("id");
   const sortName = sorts.includes("name");
+  const sortCount = (sortId ? 1 : 0) + (sortName ? 1 : 0);
+
+  // Order: A -> Z (asc) or Z -> A (desc)
+  const order = req.query.order === "desc" ? "desc" : "asc";
+  const dir = order === "desc" ? -1 : 1;
 
   let sql = `SELECT * FROM students WHERE (full_name LIKE ? OR student_code LIKE ? OR class_name LIKE ?)`;
   const params = [like, like, like];
@@ -46,15 +53,14 @@ app.get("/students", (req, res) => {
   }
   let all = db.prepare(sql).all(...params);
 
-  if (sortId)
-    all.sort(
-      (a, b) => a.student_code.localeCompare(b.student_code) || a.id - b.id,
-    );
-  else if (sortName)
-    all.sort(
-      (a, b) => nameCollator.compare(a.full_name, b.full_name) || a.id - b.id,
-    );
-  else all.sort((a, b) => b.id - a.id); // default: newest first
+  if (sortCount) {
+    all.sort((a, b) => {
+      let r = 0;
+      if (sortId) r = a.student_code.localeCompare(b.student_code);
+      if (!r && sortName) r = nameCollator.compare(a.full_name, b.full_name);
+      return r * dir || a.id - b.id;
+    });
+  } else all.sort((a, b) => b.id - a.id); // default: newest first
 
   const count = all.length;
   const pages = Math.max(1, Math.ceil(count / PER_PAGE));
@@ -66,6 +72,7 @@ app.get("/students", (req, res) => {
   if (s) base.set("q", s);
   if (cls) base.set("class", cls);
   sorts.forEach((x) => base.append("sort", x));
+  if (sortCount && order === "desc") base.set("order", "desc");
   const baseQs = base.toString() ? base.toString() + "&" : "";
 
   res.render("students", {
@@ -79,6 +86,8 @@ app.get("/students", (req, res) => {
     cls,
     sortId,
     sortName,
+    sortCount,
+    order,
     classes: Validators.CLASSES,
     baseQs,
     hasFilter: !!(s || cls),
@@ -143,6 +152,22 @@ app.post("/register", (req, res) => {
       }
     }
   }
+  // One class can only hold a student ID once. Same ID in the same class = already there,
+  // even if the name is different. The same ID may join other classes freely.
+  if (!err) {
+    const dup = db
+      .prepare(
+        "SELECT full_name FROM students WHERE student_code = ? AND class_name = ?",
+      )
+      .get(v.student_code, v.class_name);
+    if (dup) {
+      const norm = (x) => tidyName(x).normalize("NFC").toLocaleLowerCase("vi");
+      err =
+        norm(dup.full_name) === norm(v.full_name)
+          ? `${v.full_name} (${v.student_code}) is already registered in ${v.class_name}.`
+          : `Student ID ${v.student_code} already exists in ${v.class_name}.`;
+    }
+  }
   if (!err)
     try {
       db.prepare(
@@ -150,7 +175,7 @@ app.post("/register", (req, res) => {
       VALUES(@full_name,@student_code,@email,@class_name)`,
       ).run(v);
     } catch {
-      err = "This student ID is already registered.";
+      err = `Student ID ${v.student_code} already exists in ${v.class_name}.`;
     }
   if (err) return registerView(res, err, v, 400);
   res.redirect("/students?ok=1");

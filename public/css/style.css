@@ -765,37 +765,72 @@ a.pg:active {
 .controls .search {
   margin-top: 0;
 }
-.toolbar {
-  display: grid;
-  gap: 12px;
-  margin: 18px auto 0;
-  max-width: 760px;
-  padding: 16px 18px;
-  background: #fff9;
-  border: 3px solid #fff;
-  border-radius: 28px;
-}
-.tgroup {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  align-items: center;
-  justify-content: center;
-}
-.tlabel {
-  font-weight: 600;
-  color: var(--deep);
-  margin-right: 4px;
-}
-.tnote {
-  flex-basis: 100%;
-  color: #5b7fc0;
-}
-.opt {
+/* Filter / Sort dropdowns (sit next to the Search button) */
+.dd {
   position: relative;
+}
+.dd-btn {
+  padding: 10px 22px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.dd-btn i {
+  font-style: normal;
+  font-size: 0.9rem;
+  transition: transform 0.2s;
+}
+.dd.open .dd-btn i {
+  transform: rotate(180deg);
+}
+.dd-badge {
+  min-width: 24px;
+  padding: 0 7px;
+  border-radius: 99px;
+  background: #fff;
+  font: 800 0.95rem/24px "Baloo 2";
+  text-align: center;
+}
+.dd-badge[hidden] {
+  display: none;
+}
+.dd-menu {
+  position: absolute;
+  z-index: 30;
+  top: calc(100% + 18px);
+  left: 0;
+  width: 230px;
+  padding: 10px;
+  background: #fff;
+  border: 3px solid #bfe0ff;
+  border-radius: 24px;
+  text-align: left;
+  box-shadow:
+    0 10px 0 #1565d822,
+    0 18px 30px #0d3b8c33;
+  animation: pop 0.25s;
+}
+.dd-menu.right {
+  left: auto;
+  right: 0;
+}
+.dd-menu[hidden] {
+  display: none;
+}
+.dd-title {
+  margin: 6px 14px 4px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--deep);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.dd-item {
+  position: relative;
+  display: block;
   cursor: pointer;
 }
-.opt input {
+.dd-item input {
   position: absolute;
   opacity: 0;
   width: 0;
@@ -804,27 +839,47 @@ a.pg:active {
   border: 0;
   margin: 0;
 }
-.opt span {
-  display: inline-block;
-  padding: 6px 16px;
+.dd-item span {
+  display: flex;
+  justify-content: space-between;
+  padding: 9px 16px;
   border-radius: 99px;
-  background: #fff;
-  border: 3px solid #bfe0ff;
-  font-size: 0.95rem;
-  transition: 0.2s;
+  transition: 0.15s;
 }
-.opt:hover span {
-  transform: translateY(-2px);
+.dd-item:hover span {
+  background: #e8f4ff;
 }
-.opt input:checked + span {
+.dd-item input:checked + span {
   background: var(--sun);
-  border-color: #fff;
-  box-shadow: 0 4px 0 #d9a400;
   font-weight: 600;
 }
-.opt input:focus-visible + span {
+.dd-item input:checked + span::after {
+  content: "✓";
+}
+.dd-item input:focus-visible + span {
   outline: 3px solid var(--pink);
-  outline-offset: 2px;
+  outline-offset: -3px;
+}
+.dd-apply {
+  display: block;
+  width: 100%;
+  margin-top: 12px;
+  padding: 8px 20px;
+  font-size: 1rem;
+  box-shadow:
+    0 5px 0 var(--s),
+    0 8px 12px #0d3b8c33;
+}
+@media (max-width: 600px) {
+  .dd-menu,
+  .dd-menu.right {
+    position: fixed;
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+    top: auto;
+    width: auto;
+  }
 }
 .result-bar {
   display: flex;
@@ -859,4 +914,150 @@ a.pg:active {
 }
 .empty a {
   color: #fff;
+}
+
+/* ===== Home: little piano ===== */
+.piano-wrap {
+  position: relative;
+  width: min(560px, 92%);
+  margin: 64px auto 0;
+}
+.piano {
+  padding: 12px 16px 18px;
+  background: linear-gradient(#fff8, #fff0 40%), var(--pink);
+  border: 3px solid #fff;
+  border-radius: 30px 30px 22px 22px;
+  box-shadow:
+    0 10px 0 #d9569a,
+    0 20px 28px #0d3b8c44;
+}
+.piano-label {
+  display: block;
+  margin-bottom: 8px;
+  font: 800 1.1rem "Baloo 2";
+  letter-spacing: 0.08em;
+  color: var(--ink);
+}
+.keys-bed {
+  padding: 8px 8px 0;
+  background: var(--deep);
+  border-radius: 16px 16px 6px 6px;
+  box-shadow: inset 0 4px 0 #0d3b8c66;
+}
+.keys {
+  position: relative;
+  display: flex;
+  height: 150px;
+}
+.key {
+  font: inherit;
+  padding: 0;
+  cursor: pointer;
+  border: 0;
+  outline: 0;
+  transition:
+    transform 0.08s,
+    box-shadow 0.08s,
+    background 0.2s;
+}
+.key.w {
+  flex: 1;
+  background: linear-gradient(#fff, #eef7ff);
+  border-right: 2px solid #bfe0ff;
+  border-radius: 0 0 14px 14px;
+  box-shadow: 0 6px 0 #9fcaf5;
+}
+.key.w:last-child {
+  border-right: 0;
+}
+.key.b {
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  left: calc(var(--k) * 12.5% - 3.5%);
+  width: 7%;
+  height: 92px;
+  background: linear-gradient(#3a64d6, #0d3b8c);
+  border: 2px solid #fff;
+  border-top: 0;
+  border-radius: 0 0 10px 10px;
+  box-shadow: 0 6px 0 #08265e;
+}
+.key.w:hover {
+  background: linear-gradient(#fff, #dff0ff);
+}
+.key.w:active,
+.key.w.down {
+  background: var(--c);
+  transform: translateY(5px);
+  box-shadow: 0 1px 0 #9fcaf5;
+}
+.key.b:active,
+.key.b.down {
+  transform: translateY(4px);
+  box-shadow: 0 2px 0 #08265e;
+  background: linear-gradient(#ff8fc7, #d9569a);
+}
+.key:focus-visible {
+  outline: 3px solid var(--sun);
+  outline-offset: -3px;
+}
+.piano-hint {
+  margin: 22px 0 0;
+  color: #fff;
+  text-shadow: 0 2px 0 var(--deep);
+}
+.pstar {
+  position: absolute;
+  z-index: 1;
+  width: var(--z, 26px);
+  aspect-ratio: 1;
+  background: var(--c);
+  pointer-events: none;
+  clip-path: polygon(
+    50% 0,
+    62% 36%,
+    98% 38%,
+    70% 60%,
+    80% 95%,
+    50% 74%,
+    20% 95%,
+    30% 60%,
+    2% 38%,
+    38% 36%
+  );
+  animation: twinkle 2.4s ease-in-out infinite;
+}
+@keyframes twinkle {
+  50% {
+    transform: scale(0.55) rotate(25deg);
+    opacity: 0.6;
+  }
+}
+.note {
+  position: absolute;
+  font: 800 2rem "Baloo 2";
+  color: #fff;
+  text-shadow: 0 3px 0 var(--deep);
+  pointer-events: none;
+  animation: bob 3s ease-in-out infinite;
+}
+.note.n1 {
+  left: 1%;
+  top: 40px;
+  transform: rotate(-12deg);
+}
+.note.n2 {
+  right: 0;
+  top: 56px;
+  transform: rotate(10deg);
+  animation-delay: 0.8s;
+}
+@media (max-width: 480px) {
+  .keys {
+    height: 120px;
+  }
+  .key.b {
+    height: 72px;
+  }
 }

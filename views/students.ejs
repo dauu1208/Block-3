@@ -4,24 +4,36 @@
 
 <form class="controls" id="filterForm" method="get" action="/students">
   <div class="search">
-    <input name="q" value="<%= s %>" placeholder="Search by name, ID or class">
+    <input name="q" value="<%= s %>" placeholder="Search by name / student id / class">
     <button class="btn sun pop">Search</button>
-  </div>
 
-  <div class="toolbar">
-    <div class="tgroup" role="group" aria-label="Filter by class">
-      <span class="tlabel">Filter by class</span>
-      <label class="opt"><input type="radio" name="class" value="" <%= !cls ? 'checked' : '' %>><span>All</span></label>
-      <% classes.forEach(c => { %>
-        <label class="opt"><input type="radio" name="class" value="<%= c %>" <%= cls === c ? 'checked' : '' %>><span><%= c %></span></label>
-      <% }) %>
+    <div class="dd" data-dd>
+      <button type="button" class="btn mint dd-btn" aria-haspopup="true" aria-expanded="false">
+        Filter<span class="dd-badge" <%- cls ? '' : 'hidden' %>>1</span><i aria-hidden="true">▾</i>
+      </button>
+      <div class="dd-menu" role="group" aria-label="Filter by class" hidden>
+        <p class="dd-title">Class</p>
+        <label class="dd-item"><input type="radio" name="class" value="" <%= !cls ? 'checked' : '' %>><span>All classes</span></label>
+        <% classes.forEach(c => { %>
+          <label class="dd-item"><input type="radio" name="class" value="<%= c %>" <%= cls === c ? 'checked' : '' %>><span><%= c %></span></label>
+        <% }) %>
+        <button class="btn mint dd-apply">Apply</button>
+      </div>
     </div>
 
-    <div class="tgroup" role="group" aria-label="Sort">
-      <span class="tlabel">Sort by (A → Z)</span>
-      <label class="opt"><input type="checkbox" name="sort" value="id" <%= sortId ? 'checked' : '' %>><span>Student ID</span></label>
-      <label class="opt"><input type="checkbox" name="sort" value="name" <%= sortName ? 'checked' : '' %>><span>Name</span></label>
-      <% if (sortId && sortName) { %><small class="tnote">Both selected — Student ID takes priority.</small><% } %>
+    <div class="dd" data-dd>
+      <button type="button" class="btn pink dd-btn" aria-haspopup="true" aria-expanded="false">
+        Sort<span class="dd-badge" <%- sortCount ? '' : 'hidden' %>><%= sortCount %></span><i aria-hidden="true">▾</i>
+      </button>
+      <div class="dd-menu right" role="group" aria-label="Sort" hidden>
+        <p class="dd-title">Sort by</p>
+        <label class="dd-item"><input type="checkbox" name="sort" value="id" data-count <%= sortId ? 'checked' : '' %>><span>Student ID</span></label>
+        <label class="dd-item"><input type="checkbox" name="sort" value="name" data-count <%= sortName ? 'checked' : '' %>><span>Name</span></label>
+        <p class="dd-title">Order</p>
+        <label class="dd-item"><input type="radio" name="order" value="asc" <%= order === 'asc' ? 'checked' : '' %>><span>A → Z</span></label>
+        <label class="dd-item"><input type="radio" name="order" value="desc" <%= order === 'desc' ? 'checked' : '' %>><span>Z → A</span></label>
+        <button class="btn pink dd-apply">Apply</button>
+      </div>
     </div>
   </div>
 </form>
@@ -30,8 +42,8 @@
   <span class="count-pill"><b><%= count %></b> <%= count === 1 ? 'result' : 'results' %> found</span>
   <% if (cls) { %><span class="tag">Class: <%= cls %></span><% } %>
   <% if (s) { %><span class="tag">Search: “<%= s %>”</span><% } %>
-  <% if (sortId) { %><span class="tag">Sorted by Student ID</span><% } else if (sortName) { %><span class="tag">Sorted by Name</span><% } %>
-  <% if (hasFilter || sortId || sortName) { %><a class="clear" href="/students">Clear all</a><% } %>
+  <% if (sortCount) { %><span class="tag">Sorted by <%= [sortId && 'Student ID', sortName && 'Name'].filter(Boolean).join(' + ') %> (<%= order === 'desc' ? 'Z → A' : 'A → Z' %>)</span><% } %>
+  <% if (hasFilter || sortCount) { %><a class="clear" href="/students">Clear all</a><% } %>
 </div>
 
 <section class="grid">
@@ -44,7 +56,7 @@
 <% if (rows.length) for (let i = rows.length; i < 6; i++) { %><div class="card student fill" aria-hidden="true"></div><% } %>
 </section>
 <% if (!rows.length) { %>
-  <% if (hasFilter) { %><p class="empty">No students match your filters. <a href="/students">Clear filters</a></p>
+  <% if (hasFilter) { %><p class="empty">No students match your filters.</p>
   <% } else { %><p class="empty">No students yet. <a href="/register">Be the first to register</a></p><% } %>
 <% } %>
 <% if (pages > 1) {
