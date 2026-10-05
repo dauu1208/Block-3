@@ -18,16 +18,28 @@ app.get("/", (req, res) => {
   res.render("home", { page: "home", total });
 });
 
+const PER_PAGE = 6;
+
 app.get("/students", (req, res) => {
   const s = (req.query.q || "").trim();
   const like = `%${s}%`;
+  const where = `WHERE full_name LIKE ? OR student_code LIKE ? OR class_name LIKE ?`;
+  const count = db
+    .prepare(`SELECT COUNT(*) n FROM students ${where}`)
+    .get(like, like, like).n;
+  const pages = Math.max(1, Math.ceil(count / PER_PAGE));
+  const pageNo = Math.min(Math.max(parseInt(req.query.page) || 1, 1), pages);
   const rows = db
-    .prepare(
-      `SELECT * FROM students WHERE full_name LIKE ? OR student_code LIKE ?
-    OR class_name LIKE ? ORDER BY id DESC`,
-    )
-    .all(like, like, like);
-  res.render("students", { page: "students", rows, s, ok: req.query.ok });
+    .prepare(`SELECT * FROM students ${where} ORDER BY id DESC LIMIT ? OFFSET ?`)
+    .all(like, like, like, PER_PAGE, (pageNo - 1) * PER_PAGE);
+  res.render("students", {
+    page: "students",
+    rows,
+    s,
+    ok: req.query.ok,
+    pageNo,
+    pages,
+  });
 });
 
 app.get("/students/:id", (req, res) => {
@@ -67,4 +79,8 @@ app.post("/register", (req, res) => {
   res.redirect("/students?ok=1");
 });
 
-app.listen(3000, () => console.log("Running at http://localhost:3000"));
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});

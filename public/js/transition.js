@@ -68,8 +68,8 @@
     const url = new URL(a.href, location.href);
     const type = EFFECT[url.pathname];
     if (url.origin !== location.origin || !type) return;
-    if (url.pathname === location.pathname && url.search === location.search)
-      return; // already on that tab
+    if (url.pathname === location.pathname)
+      return; // already on that tab (e.g. switching pages in the list: no transition)
     if (reduce) return; // user prefers reduced motion → navigate normally
 
     e.preventDefault();

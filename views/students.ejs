@@ -12,6 +12,24 @@
     <small>View profile →</small>
   </a>
 <% }) %>
+<% if (rows.length) for (let i = rows.length; i < 6; i++) { %><div class="card student fill" aria-hidden="true"></div><% } %>
 </section>
 <% if (!rows.length) { %><p class="empty">No students yet. <a href="/register">Be the first to register</a></p><% } %>
+<% if (pages > 1) {
+  const q = s ? '&q=' + encodeURIComponent(s) : '';
+  const nums = [];
+  for (let i = 1; i <= pages; i++) {
+    if (i === 1 || i === pages || Math.abs(i - pageNo) <= 1) nums.push(i);
+    else if (nums[nums.length - 1] !== '…') nums.push('…');
+  }
+%>
+<nav class="pager-nav" aria-label="Pages">
+  <% if (pageNo > 1) { %><a class="pg" href="/students?page=<%= pageNo - 1 %><%= q %>" aria-label="Previous page">‹</a><% } else { %><span class="pg off">‹</span><% } %>
+  <% nums.forEach(n => { %>
+    <% if (n === '…') { %><span class="pg gap">…</span>
+    <% } else { %><a class="pg <%= n === pageNo ? 'on' : '' %>" href="/students?page=<%= n %><%= q %>"><%= n %></a><% } %>
+  <% }) %>
+  <% if (pageNo < pages) { %><a class="pg" href="/students?page=<%= pageNo + 1 %><%= q %>" aria-label="Next page">›</a><% } else { %><span class="pg off">›</span><% } %>
+</nav>
+<% } %>
 <%- include('partials/foot') %>

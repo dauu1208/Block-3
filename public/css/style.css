@@ -28,7 +28,7 @@ a{color:inherit}
 .btn{--b:var(--pink);--s:#d9569a;font:600 1.15rem Fredoka;color:var(--ink);text-decoration:none;cursor:pointer;
  border:3px solid #fff;padding:14px 30px;border-radius:99px;background:linear-gradient(#fff8,#fff0 50%),var(--b);
  box-shadow:0 8px 0 var(--s),0 14px 20px #0d3b8c44;transition:.15s;display:inline-block}
-.btn:hover{transform:translateY(-3px) rotateX(12deg)}
+.btn:hover{filter:brightness(1.07)}
 .btn:active{transform:translateY(7px);box-shadow:0 1px 0 var(--s)}
 .btn.mint{--b:var(--mint);--s:#2aa56e}.btn.sun{--b:var(--sun);--s:#d9a400}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:22px;margin-top:30px;perspective:900px}
@@ -101,9 +101,19 @@ input:focus{border-color:var(--pink);transform:scale(1.03);box-shadow:0 0 0 5px 
  .profile,.info li,.ghost{opacity:1!important;transform:none!important}.avatar{transform:none!important}.ghost{opacity:.28!important}}
 
 /* Student card link + prev/next buttons */
-.student{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;height:170px;padding:14px;text-decoration:none;color:inherit}
+.student{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;height:130px;padding:10px;text-decoration:none;color:inherit}
 .student h3{margin:0;font:800 1.35rem "Baloo 2"}.student p{margin:0}
 .student small{color:#5b7fc0;opacity:0;transform:translateY(4px);transition:.25s}
 .student:hover small,.student:focus-visible small{opacity:1;transform:none}
 .pager{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:10px}
 .pager .btn{padding:10px 24px;font-size:1rem}
+
+/* Pagination */
+.pager-nav{display:flex;gap:8px;justify-content:center;align-items:center;flex-wrap:wrap;margin-top:34px}
+.pg{min-width:42px;height:42px;padding:0 12px;display:inline-grid;place-items:center;border-radius:99px;
+ background:#fffd;border:3px solid #fff;box-shadow:0 5px 0 #1565d855;text-decoration:none;font-weight:600;transition:.2s}
+a.pg:hover{transform:translateY(-3px) rotate(-3deg);background:var(--sun)}
+a.pg:active{transform:translateY(3px);box-shadow:0 1px 0 #1565d855}
+.pg.on{background:var(--sun);box-shadow:0 5px 0 #d9a400;transform:scale(1.1)}
+.pg.off{opacity:.45}.pg.gap{background:none;border-color:transparent;box-shadow:none;min-width:auto;padding:0 2px;color:#fff}
+.student.fill{visibility:hidden;pointer-events:none}
