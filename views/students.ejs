@@ -1,10 +1,39 @@
 <%- include('partials/head') %>
 <h2 class="bubble s" data-bubble="Students"></h2>
 <% if (ok) { %><p class="toast">You're registered! Your name is now on the list.</p><% } %>
-<form class="search" method="get" action="/students">
-  <input name="q" value="<%= s %>" placeholder="Search by name, ID or class">
-  <button class="btn sun pop">Search</button>
+
+<form class="controls" id="filterForm" method="get" action="/students">
+  <div class="search">
+    <input name="q" value="<%= s %>" placeholder="Search by name, ID or class">
+    <button class="btn sun pop">Search</button>
+  </div>
+
+  <div class="toolbar">
+    <div class="tgroup" role="group" aria-label="Filter by class">
+      <span class="tlabel">Filter by class</span>
+      <label class="opt"><input type="radio" name="class" value="" <%= !cls ? 'checked' : '' %>><span>All</span></label>
+      <% classes.forEach(c => { %>
+        <label class="opt"><input type="radio" name="class" value="<%= c %>" <%= cls === c ? 'checked' : '' %>><span><%= c %></span></label>
+      <% }) %>
+    </div>
+
+    <div class="tgroup" role="group" aria-label="Sort">
+      <span class="tlabel">Sort by (A → Z)</span>
+      <label class="opt"><input type="checkbox" name="sort" value="id" <%= sortId ? 'checked' : '' %>><span>Student ID</span></label>
+      <label class="opt"><input type="checkbox" name="sort" value="name" <%= sortName ? 'checked' : '' %>><span>Name</span></label>
+      <% if (sortId && sortName) { %><small class="tnote">Both selected — Student ID takes priority.</small><% } %>
+    </div>
+  </div>
 </form>
+
+<div class="result-bar" role="status" aria-live="polite">
+  <span class="count-pill"><b><%= count %></b> <%= count === 1 ? 'result' : 'results' %> found</span>
+  <% if (cls) { %><span class="tag">Class: <%= cls %></span><% } %>
+  <% if (s) { %><span class="tag">Search: “<%= s %>”</span><% } %>
+  <% if (sortId) { %><span class="tag">Sorted by Student ID</span><% } else if (sortName) { %><span class="tag">Sorted by Name</span><% } %>
+  <% if (hasFilter || sortId || sortName) { %><a class="clear" href="/students">Clear all</a><% } %>
+</div>
+
 <section class="grid">
 <% rows.forEach(r => { %>
   <a class="card tilt student" href="/students/<%= r.id %>">
@@ -14,9 +43,11 @@
 <% }) %>
 <% if (rows.length) for (let i = rows.length; i < 6; i++) { %><div class="card student fill" aria-hidden="true"></div><% } %>
 </section>
-<% if (!rows.length) { %><p class="empty">No students yet. <a href="/register">Be the first to register</a></p><% } %>
+<% if (!rows.length) { %>
+  <% if (hasFilter) { %><p class="empty">No students match your filters. <a href="/students">Clear filters</a></p>
+  <% } else { %><p class="empty">No students yet. <a href="/register">Be the first to register</a></p><% } %>
+<% } %>
 <% if (pages > 1) {
-  const q = s ? '&q=' + encodeURIComponent(s) : '';
   const nums = [];
   for (let i = 1; i <= pages; i++) {
     if (i === 1 || i === pages || Math.abs(i - pageNo) <= 1) nums.push(i);
@@ -24,12 +55,12 @@
   }
 %>
 <nav class="pager-nav" aria-label="Pages">
-  <% if (pageNo > 1) { %><a class="pg" href="/students?page=<%= pageNo - 1 %><%= q %>" aria-label="Previous page">‹</a><% } else { %><span class="pg off">‹</span><% } %>
+  <% if (pageNo > 1) { %><a class="pg" href="/students?<%= baseQs %>page=<%= pageNo - 1 %>" aria-label="Previous page">‹</a><% } else { %><span class="pg off">‹</span><% } %>
   <% nums.forEach(n => { %>
     <% if (n === '…') { %><span class="pg gap">…</span>
-    <% } else { %><a class="pg <%= n === pageNo ? 'on' : '' %>" href="/students?page=<%= n %><%= q %>"><%= n %></a><% } %>
+    <% } else { %><a class="pg <%= n === pageNo ? 'on' : '' %>" href="/students?<%= baseQs %>page=<%= n %>"><%= n %></a><% } %>
   <% }) %>
-  <% if (pageNo < pages) { %><a class="pg" href="/students?page=<%= pageNo + 1 %><%= q %>" aria-label="Next page">›</a><% } else { %><span class="pg off">›</span><% } %>
+  <% if (pageNo < pages) { %><a class="pg" href="/students?<%= baseQs %>page=<%= pageNo + 1 %>" aria-label="Next page">›</a><% } else { %><span class="pg off">›</span><% } %>
 </nav>
 <% } %>
 <%- include('partials/foot') %>

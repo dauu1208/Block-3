@@ -1,11 +1,36 @@
 <%- include('partials/head') %>
 <h2 class="bubble s" data-bubble="Register"></h2>
-<form class="card form" method="post" action="/register">
+<form class="card form" id="regForm" method="post" action="/register" novalidate>
   <% if (err) { %><p class="toast bad"><%= err %></p><% } %>
-  <input name="full_name" value="<%= v.full_name||'' %>" placeholder="Full name" required>
-  <input name="student_code" value="<%= v.student_code||'' %>" placeholder="Student ID" required>
-  <input name="email" type="email" value="<%= v.email||'' %>" placeholder="Email" required>
-  <input name="class_name" value="<%= v.class_name||'' %>" placeholder="Class" required>
+
+  <div class="field" data-field="full_name">
+    <input name="full_name" value="<%= v.full_name||'' %>" placeholder="Full name" autocomplete="name" aria-describedby="r-full_name">
+    <ul class="rules" id="r-full_name" hidden></ul>
+  </div>
+
+  <div class="field" data-field="student_code">
+    <input name="student_code" value="<%= v.student_code||'' %>" placeholder="Student ID (8 digits)" inputmode="numeric" autocomplete="off" aria-describedby="r-student_code">
+    <ul class="rules" id="r-student_code" hidden></ul>
+  </div>
+
+  <div class="field" data-field="email">
+    <input name="email" type="text" inputmode="email" value="<%= v.email||'' %>" placeholder="Email" autocomplete="email" aria-describedby="r-email">
+    <ul class="rules" id="r-email" hidden></ul>
+  </div>
+
+  <div class="field" data-field="class_name">
+    <div class="select">
+      <button type="button" class="select-btn" aria-haspopup="listbox" aria-expanded="false" aria-describedby="r-class_name">
+        <span class="select-val">Select your class</span><i aria-hidden="true">▾</i>
+      </button>
+      <ul class="select-menu" role="listbox" aria-label="Class" hidden>
+        <% classes.forEach(c => { %><li role="option" tabindex="-1" data-value="<%= c %>" aria-selected="false"><%= c %></li><% }) %>
+      </ul>
+      <input type="hidden" name="class_name" value="<%= v.class_name||'' %>">
+    </div>
+    <ul class="rules" id="r-class_name" hidden></ul>
+  </div>
+
   <button class="btn pink pop">Submit</button>
 </form>
 <%- include('partials/foot') %>
