@@ -1,0 +1,351 @@
+/* =====================================================================
+   PAGE TRANSITION EFFECTS BETWEEN TABS
+   - html.vt-out : covering the screen (before the page changes)
+   - html.vt-in  : the new page just loaded and is opening up (revealing the UI)
+   - html[data-vt] = cloud | bubble | fresh
+   Everything is HIDDEN by default (off-screen / scale 0), so with
+   "reduce motion" turned on you simply see nothing.
+   ===================================================================== */
+#vt {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  pointer-events: none;
+  visibility: hidden;
+  overflow: hidden;
+}
+html.vt-out #vt,
+html.vt-in #vt {
+  visibility: visible;
+}
+html.vt-out #vt {
+  pointer-events: auto;
+} /* block clicks while covering */
+#vt > div {
+  position: absolute;
+  inset: 0;
+  display: none;
+}
+html[data-vt="cloud"] #vt .vt-cloud,
+html[data-vt="bubble"] #vt .vt-bubble,
+html[data-vt="fresh"] #vt .vt-fresh {
+  display: block;
+}
+html.vt-in .fx {
+  z-index: 1001;
+} /* confetti stars sit above the overlay */
+
+/* ---------------------------------------------------------------------
+   1) CLOUDS  –  rush in from both sides and meet in the middle, then drift apart to reveal the page
+   --------------------------------------------------------------------- */
+.vt-cloud .c {
+  position: absolute;
+  top: var(--y);
+  width: var(--w);
+  height: var(--h);
+  border-radius: 999px;
+  background: linear-gradient(#fff 55%, #e3f2ff);
+  box-shadow:
+    inset 0 -14px 0 #cfe6ff,
+    0 20px 34px #1565d84d;
+  will-change: transform;
+  transform: translate3d(var(--off), 0, 0);
+}
+.vt-cloud .l {
+  left: -22vw;
+  --off: -140vw;
+}
+.vt-cloud .r {
+  right: -22vw;
+  --off: 140vw;
+}
+.vt-cloud .c::before,
+.vt-cloud .c::after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  background: #fff;
+  aspect-ratio: 1;
+}
+.vt-cloud .c::before {
+  left: 10%;
+  top: -48%;
+  width: 40%;
+}
+.vt-cloud .c::after {
+  left: 44%;
+  top: -32%;
+  width: 32%;
+}
+.vt-cloud .r::before {
+  left: auto;
+  right: 10%;
+}
+.vt-cloud .r::after {
+  left: auto;
+  right: 44%;
+}
+
+@keyframes cloudIn {
+  from {
+    transform: translate3d(var(--off), 0, 0);
+  }
+  to {
+    transform: translate3d(0, 0, 0);
+  }
+}
+@keyframes cloudOut {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(var(--off), 0, 0);
+  }
+}
+html.vt-out .vt-cloud .c {
+  animation: cloudIn 0.7s var(--dl) cubic-bezier(0.22, 0.8, 0.3, 1) both;
+}
+html.vt-in .vt-cloud .c {
+  animation: cloudOut 1s calc(0.12s + var(--dl)) cubic-bezier(0.6, 0, 0.35, 1)
+    both;
+}
+
+/* ---------------------------------------------------------------------
+   2) BUBBLES  –  candy bubbles flood up from the bottom, then pop one by one
+   --------------------------------------------------------------------- */
+.vt-bubble .bb {
+  position: absolute;
+  left: var(--cx);
+  top: var(--cy);
+  --d: calc((13vw + 17vh) * var(--k));
+  width: var(--d);
+  height: var(--d);
+  margin: calc(var(--d) / -2) 0 0 calc(var(--d) / -2);
+  border-radius: 50%;
+  border: 4px solid #fffd;
+  will-change: transform;
+  background:
+    radial-gradient(circle at 30% 26%, #fff 0 7%, #fff0 20%),
+    radial-gradient(circle at 50% 58%, var(--c1), var(--c2) 135%);
+  box-shadow:
+    inset -10px -14px 30px #fff6,
+    inset 8px 10px 22px #ffffff80,
+    0 10px 24px #0d3b8c40;
+  transform: translate3d(0, 130vh, 0) scale(0.6);
+}
+.vt-bubble .bb::after {
+  content: "";
+  position: absolute;
+  left: 18%;
+  top: 12%;
+  width: 22%;
+  height: 12%;
+  border-radius: 50%;
+  background: #fffb;
+  transform: rotate(-35deg);
+  filter: blur(1px);
+}
+
+.vt-bubble .sb {
+  position: absolute;
+  left: var(--x);
+  top: 0;
+  width: var(--s);
+  height: var(--s);
+  border-radius: 50%;
+  border: 2px solid #fff;
+  background: radial-gradient(
+    circle at 30% 28%,
+    #fff 0 12%,
+    #fff4 30%,
+    #ffffff1a 70%
+  );
+  box-shadow: inset 0 0 8px #fff9;
+  transform: translate3d(0, 115vh, 0);
+  opacity: 0;
+}
+
+@keyframes bubRise {
+  0% {
+    transform: translate3d(0, 130vh, 0) scale(0.6);
+  }
+  62% {
+    transform: translate3d(0, -3vh, 0) scale(1.1);
+  }
+  82% {
+    transform: translate3d(0, 1vh, 0) scale(0.97);
+  }
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+@keyframes bubPop {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  35% {
+    transform: scale(1.14);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1.55);
+    opacity: 0;
+  }
+}
+@keyframes bubFloat {
+  0% {
+    transform: translate3d(0, 115vh, 0);
+    opacity: 1;
+  }
+  50% {
+    transform: translate3d(var(--sw), 55vh, 0);
+  }
+  100% {
+    transform: translate3d(0, -25vh, 0);
+    opacity: 1;
+  }
+}
+html.vt-out .vt-bubble .bb {
+  animation: bubRise 0.72s var(--up) cubic-bezier(0.3, 0.7, 0.3, 1) both;
+}
+html.vt-in .vt-bubble .bb {
+  animation: bubPop 0.42s calc(0.1s + var(--po)) ease-out both;
+}
+html.vt-out .vt-bubble .sb {
+  animation: bubFloat var(--t) var(--dl) ease-in-out both;
+}
+
+/* ---------------------------------------------------------------------
+   3) FRESH (back to Home)  –  candy ripples spread from the clicked button, the
+      Twinkle star pops up mid-screen, then the ripples collapse to reveal home
+   --------------------------------------------------------------------- */
+html {
+  --ox: 50%;
+  --oy: 50%;
+}
+.vt-fresh .ring {
+  position: absolute;
+  inset: 0;
+  background: var(--bg);
+  clip-path: circle(0 at 50% 42%);
+  will-change: clip-path;
+}
+@keyframes ringOpen {
+  from {
+    clip-path: circle(0 at var(--ox) var(--oy));
+  }
+  to {
+    clip-path: circle(150vmax at var(--ox) var(--oy));
+  }
+}
+@keyframes ringClose {
+  from {
+    clip-path: circle(150vmax at 50% 42%);
+  }
+  to {
+    clip-path: circle(0 at 50% 42%);
+  }
+}
+html.vt-out .vt-fresh .ring {
+  animation: ringOpen 0.65s calc(var(--i) * 0.09s) cubic-bezier(0.5, 0, 0.2, 1)
+    both;
+}
+html.vt-in .vt-fresh .ring {
+  animation: ringClose 0.7s calc(0.1s + (4 - var(--i)) * 0.09s)
+    cubic-bezier(0.6, 0, 0.3, 1) both;
+}
+
+.vt-fresh .center {
+  position: absolute;
+  left: 50%;
+  top: 42%;
+  transform: translate(-50%, -50%);
+  display: grid;
+  justify-items: center;
+  gap: 0;
+}
+.star-wrap {
+  filter: drop-shadow(0 6px 0 #d9a400) drop-shadow(0 14px 16px #0d3b8c55);
+}
+.star {
+  display: block;
+  width: clamp(110px, 22vmin, 170px);
+  aspect-ratio: 1;
+  background: linear-gradient(#fff6a8, #ffd23f 55%, #ff9f43);
+  clip-path: polygon(
+    50% 0,
+    62% 36%,
+    98% 38%,
+    70% 60%,
+    80% 95%,
+    50% 74%,
+    20% 95%,
+    30% 60%,
+    2% 38%,
+    38% 36%
+  );
+  transform: scale(0) rotate(-200deg);
+  opacity: 0;
+}
+.vt-word {
+  margin: 0;
+  opacity: 0;
+  transform: scale(0);
+}
+@keyframes starIn {
+  0% {
+    transform: scale(0) rotate(-200deg);
+    opacity: 1;
+  }
+  70% {
+    transform: scale(1.25) rotate(12deg);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) rotate(0);
+    opacity: 1;
+  }
+}
+@keyframes starOut {
+  from {
+    transform: scale(1) rotate(0);
+    opacity: 1;
+  }
+  to {
+    transform: scale(4.5) rotate(160deg);
+    opacity: 0;
+  }
+}
+@keyframes wordIn {
+  0% {
+    transform: translateY(30px) scale(0.4);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+@keyframes wordOut {
+  from {
+    transform: scale(1);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(-20px) scale(1.4);
+    opacity: 0;
+  }
+}
+html.vt-out .star {
+  animation: starIn 0.55s 0.45s cubic-bezier(0.3, 1.4, 0.5, 1) both;
+}
+html.vt-out .vt-word {
+  animation: wordIn 0.4s 0.62s ease-out both;
+}
+html.vt-in .star {
+  animation: starOut 0.6s 0.08s cubic-bezier(0.5, 0, 0.8, 0.4) both;
+}
+html.vt-in .vt-word {
+  animation: wordOut 0.45s 0.08s ease-in both;
+}

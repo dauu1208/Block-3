@@ -1,0 +1,48 @@
+<%# Transition overlay: clouds (Students tab) • bubbles (Register tab) • fresh (back to Home) %>
+<div id="vt" aria-hidden="true">
+
+  <%# ===== 1. CLOUDS: rush in from both sides, then drift apart ===== %>
+  <div class="vt-cloud">
+    <% for (const side of ['l', 'r']) { for (let i = 0; i < 9; i++) {
+         const y  = -8 + i * 12;
+         const w  = 78 + ((i * 7 + (side === 'r' ? 3 : 0)) % 5) * 4;
+         const h  = 26 + ((i * 3) % 4) * 2;
+         const dl = (((i * 5) + (side === 'r' ? 2 : 0)) % 7) * 0.035; %>
+      <i class="c <%= side %>" style="--y:<%= y %>vh;--w:<%= w %>vw;--h:<%= h %>vh;--dl:<%= dl.toFixed(3) %>s"></i>
+    <% } } %>
+  </div>
+
+  <%# ===== 2. BUBBLES: flood up from the bottom, then pop ===== %>
+  <div class="vt-bubble">
+    <% const pal = [['#9fd0ff','#2a6fd6'],['#ffc2e1','#d9569a'],['#fff0a0','#ffb62e'],['#a8f2cf','#2aa56e'],['#b9ccff','#3a64d6'],['#ffb0c4','#c93a5c']];
+       const COLS = 8, ROWS = 6;
+       for (let r = 0; r < ROWS; r++) { for (let c = 0; c < COLS; c++) {
+         const n  = r * COLS + c;
+         const k  = (1.1 + ((n * 37) % 9) / 22).toFixed(2);
+         const cx = ((c + 0.5) * 100 / COLS + (((n * 53) % 7) - 3) * 0.5).toFixed(1);
+         const cy = ((r + 0.5) * 100 / ROWS + (((n * 29) % 7) - 3) * 0.6).toFixed(1);
+         const up = ((ROWS - 1 - r) * 0.06 + ((n * 29) % 5) * 0.025).toFixed(3);
+         const po = (((n * 41) % 17) * 0.03).toFixed(3);
+         const p  = pal[(n * 5 + r) % pal.length]; %>
+      <i class="bb" style="--cx:<%= cx %>%;--cy:<%= cy %>%;--k:<%= k %>;--up:<%= up %>s;--po:<%= po %>s;--c1:<%= p[0] %>;--c2:<%= p[1] %>"></i>
+    <% } } %>
+    <%# small foam bubbles floating up ahead of the big ones %>
+    <% for (let i = 0; i < 18; i++) { %>
+      <i class="sb" style="--x:<%= ((i * 37) % 100) %>%;--s:<%= 14 + (i * 13) % 34 %>px;--t:<%= (0.55 + ((i * 7) % 6) * 0.07).toFixed(2) %>s;--dl:<%= (((i * 11) % 8) * 0.04).toFixed(2) %>s;--sw:<%= ((i % 2) ? 1 : -1) * (14 + (i * 5) % 22) %>px"></i>
+    <% } %>
+  </div>
+
+  <%# ===== 3. FRESH: candy ripples + the Twinkle star ===== %>
+  <div class="vt-fresh">
+    <i class="ring" style="--i:0;--bg:#ff8fc7"></i>
+    <i class="ring" style="--i:1;--bg:#ff9f43"></i>
+    <i class="ring" style="--i:2;--bg:#ffd23f"></i>
+    <i class="ring" style="--i:3;--bg:#5be0a0"></i>
+    <i class="ring" style="--i:4;--bg:linear-gradient(#1f8cff,#7cc4ff 60%,#d8f0ff)"></i>
+    <div class="center">
+      <div class="star-wrap"><i class="star"></i></div>
+      <div class="vt-word bubble s" data-bubble="Twinkle"></div>
+    </div>
+  </div>
+
+</div>

@@ -1,9 +1,9 @@
 <%- include('partials/head') %>
-<h2 class="bubble s" data-bubble="Danh sách"></h2>
-<% if (ok) { %><p class="toast">Đăng ký thành công! Bạn đã có tên trong danh sách.</p><% } %>
+<h2 class="bubble s" data-bubble="Students"></h2>
+<% if (ok) { %><p class="toast">You're registered! Your name is now on the list.</p><% } %>
 <form class="search" method="get" action="/students">
-  <input name="q" value="<%= s %>" placeholder="Tìm theo tên, mã hoặc lớp">
-  <button class="btn sun pop">Tìm</button>
+  <input name="q" value="<%= s %>" placeholder="Search by name, ID or class">
+  <button class="btn sun pop">Search</button>
 </form>
 <section class="grid">
 <% rows.forEach(r => { %>
@@ -13,5 +13,5 @@
   </article>
 <% }) %>
 </section>
-<% if (!rows.length) { %><p class="empty">Chưa có bạn nào. <a href="/register">Đăng ký người đầu tiên</a></p><% } %>
+<% if (!rows.length) { %><p class="empty">No students yet. <a href="/register">Be the first to register</a></p><% } %>
 <%- include('partials/foot') %>
